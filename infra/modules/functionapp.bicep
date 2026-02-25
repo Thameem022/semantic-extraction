@@ -13,11 +13,8 @@ param location string
 @description('Common resource tags.')
 param tags object = {}
 
-@description('Resource ID of the storage account used for AzureWebJobsStorage.')
-param storageAccountId string
-
-@description('Name of the storage account used for AzureWebJobsStorage.')
-param storageAccountName string
+@description('Storage connection string for AzureWebJobsStorage (from storage module output).')
+param storageConnectionString string
 
 @description('Resource ID of the Log Analytics workspace.')
 param logAnalyticsWorkspaceId string
@@ -27,13 +24,6 @@ param applicationInsightsConnectionString string
 
 var hostingPlanName = '${appName}-${environment}-plan'
 var functionAppName = '${appName}-${environment}-func'
-
-resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' existing = {
-  name: storageAccountName
-}
-
-var listKeysResult = listKeys(storageAccount.id, '2023-01-01')
-var storageConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};AccountKey=${listKeysResult.keys[0].value};EndpointSuffix=core.windows.net'
 
 resource hostingPlan 'Microsoft.Web/serverfarms@2023-01-01' = {
   name: hostingPlanName
@@ -64,6 +54,7 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
       linuxFxVersion: 'Python|3.12'
       appSettings: [
         { name: 'AzureWebJobsStorage', value: storageConnectionString }
+        { name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING', value: storageConnectionString }
         { name: 'WEBSITE_RUN_FROM_PACKAGE', value: '1' }
         { name: 'FUNCTIONS_EXTENSION_VERSION', value: '~4' }
         { name: 'FUNCTIONS_WORKER_RUNTIME', value: 'python' }
