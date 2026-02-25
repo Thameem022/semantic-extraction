@@ -7,6 +7,8 @@ LOCATION="${LOCATION:-eastus}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PARAM_FILE="${SCRIPT_DIR}/../parameters.dev.json"
 DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-semex-dev-deployment}"
+# Set SKIP_WHATIF=1 to skip what-if (avoids long-running HTTPS calls that can hit ConnectionResetError on free tier / VPN / proxy)
+SKIP_WHATIF="${SKIP_WHATIF:-0}"
 
 if [[ -z "${SUBSCRIPTION_ID}" ]]; then
   echo "SUBSCRIPTION_ID environment variable must be set."
@@ -26,12 +28,16 @@ else
   echo "Resource group ${RESOURCE_GROUP_NAME} already exists."
 fi
 
-echo "Running what-if for deployment ${DEPLOYMENT_NAME}..."
-az deployment group what-if \
-  --resource-group "${RESOURCE_GROUP_NAME}" \
-  --name "${DEPLOYMENT_NAME}" \
-  --template-file "${SCRIPT_DIR}/../main.bicep" \
-  --parameters "@${PARAM_FILE}"
+if [[ "${SKIP_WHATIF}" != '1' && "${SKIP_WHATIF}" != 'true' && "${SKIP_WHATIF}" != 'yes' ]]; then
+  echo "Running what-if for deployment ${DEPLOYMENT_NAME}..."
+  az deployment group what-if \
+    --resource-group "${RESOURCE_GROUP_NAME}" \
+    --name "${DEPLOYMENT_NAME}" \
+    --template-file "${SCRIPT_DIR}/../main.bicep" \
+    --parameters "@${PARAM_FILE}"
+else
+  echo "Skipping what-if (SKIP_WHATIF=${SKIP_WHATIF})."
+fi
 
 echo "Running create/update deployment ${DEPLOYMENT_NAME}..."
 az deployment group create \
