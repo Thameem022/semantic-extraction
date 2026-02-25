@@ -16,7 +16,8 @@ param retentionDays int = 7
 @description('Common resource tags.')
 param tags object = {}
 
-var storageAccountName = '${appName}-${environment}-sa'
+var prefix = toLower('${replace(appName, '-', '')}${replace(environment, '-', '')}sa')
+var storageAccountName = '${prefix}${uniqueString(resourceGroup().id)}'
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   name: storageAccountName
@@ -90,7 +91,7 @@ resource containerRejected 'Microsoft.Storage/storageAccounts/blobServices/conta
   }
 }
 
-var storageAccountKey = listKeys(storageAccount.id, storageAccount.apiVersion).keys[0].value
+var storageAccountKey = storageAccount.listKeys().keys[0].value
 var storageConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccountKey};EndpointSuffix=core.windows.net'
 
 output storageAccountName string = storageAccount.name
