@@ -1,5 +1,5 @@
-// Function App module: Linux Consumption plan + Python 3.12 Function App (v4),
-// system-assigned managed identity, app settings for blob trigger.
+// Function App module: Linux plan + Python 3.12 Function App (v4).
+// Uses Basic B1 by default (Consumption Y1 requires "Dynamic VMs" quota in the subscription).
 
 @description('Application base name. Used in resource naming.')
 param appName string
@@ -22,6 +22,12 @@ param logAnalyticsWorkspaceId string
 @description('Application Insights connection string.')
 param applicationInsightsConnectionString string
 
+@description('App Service Plan SKU: B1 (Basic) works without Consumption quota; use Y1 for Consumption when quota is available.')
+param hostingPlanSku string = 'B1'
+
+@description('App Service Plan tier: Basic for B1, Dynamic for Y1 Consumption.')
+param hostingPlanTier string = 'Basic'
+
 var hostingPlanName = '${appName}-${environment}-plan'
 var functionAppName = '${appName}-${environment}-func'
 
@@ -31,8 +37,8 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2023-01-01' = {
   kind: 'linux'
   tags: tags
   sku: {
-    name: 'Y1'
-    tier: 'Dynamic'
+    name: hostingPlanSku
+    tier: hostingPlanTier
   }
   properties: {
     reserved: true
@@ -61,7 +67,6 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
         { name: 'APPINSIGHTS_CONNECTIONSTRING', value: applicationInsightsConnectionString }
         { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: applicationInsightsConnectionString }
         { name: 'WEBSITE_CONTENTOVERVNET', value: '1' }
-        { name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING', value: storageConnectionString }
       ]
     }
   }
