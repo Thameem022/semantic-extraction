@@ -50,7 +50,7 @@ az account list -o table
 - `scripts/deploy-dev.sh` / `scripts/deploy-prod.sh`  
   Helper scripts that:
   - Ensure the resource group exists.
-  - Run `az deployment group what-if`.
+  - Optionally run `az deployment group what-if` (skip with `SKIP_WHATIF=1`).
   - Run `az deployment group create`.
 
 ### Resource Naming
@@ -79,8 +79,14 @@ export LOCATION="eastus"
 
 The script will:
 - Create the dev resource group if it does not exist.
-- Run a what-if against `infra/main.bicep` with `parameters.dev.json`.
+- Run a what-if against `infra/main.bicep` with `parameters.dev.json` (unless `SKIP_WHATIF=1`).
 - Apply the deployment.
+
+To skip what-if (useful if you hit connection resets or throttling):
+
+```bash
+SKIP_WHATIF=1 ./deploy-dev.sh
+```
 
 ### Deploying to Prod
 
@@ -101,6 +107,21 @@ The script will:
 - Create the prod resource group if it does not exist.
 - Run a what-if against `infra/main.bicep` with `parameters.prod.json`.
 - Apply the deployment.
+
+### Troubleshooting: Connection reset (10054)
+
+If `az deployment group what-if` or `az deployment group create` fails with `ConnectionResetError(10054)` or "connection was forcibly closed", common causes are:
+
+- **Long-running HTTPS to ARM** – what-if and create are heavy; transient blips or throttling (especially on free/low-quota subscriptions) can reset the connection.
+- **VPN / corporate proxy / antivirus** – can close long-lived TLS connections.
+
+**Quick fix:** Skip what-if and deploy only:
+
+```bash
+SKIP_WHATIF=1 ./deploy-dev.sh
+```
+
+Then retry. If the failure happens during `create`, retry the same command; often the second attempt succeeds.
 
 ### Customizing Parameters
 
