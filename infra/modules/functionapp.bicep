@@ -85,14 +85,14 @@ resource functionDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-p
       {
         category: 'FunctionAppLogs'
         enabled: true
-        retentionPolicy: { enabled: false; days: 0 }
+        retentionPolicy: { enabled: false, days: 0 }
       }
     ]
     metrics: [
       {
         category: 'AllMetrics'
         enabled: true
-        retentionPolicy: { enabled: false; days: 0 }
+        retentionPolicy: { enabled: false, days: 0 }
       }
     ]
   }
