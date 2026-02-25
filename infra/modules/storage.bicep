@@ -42,11 +42,6 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
       }
       keySource: 'Microsoft.Storage'
     }
-    deleteRetentionPolicy: {
-      enabled: true
-      days: retentionDays
-    }
-    isVersioningEnabled: true
   }
 }
 
@@ -95,5 +90,9 @@ resource containerRejected 'Microsoft.Storage/storageAccounts/blobServices/conta
   }
 }
 
+var storageAccountKey = listKeys(storageAccount.id, storageAccount.apiVersion).keys[0].value
+var storageConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccountKey};EndpointSuffix=core.windows.net'
+
 output storageAccountName string = storageAccount.name
 output storageAccountId string = storageAccount.id
+output storageConnectionString string = storageConnectionString

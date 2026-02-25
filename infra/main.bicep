@@ -20,13 +20,6 @@ param retentionDays int = 7
 @description('Common resource tags.')
 param tags object = {}
 
-// Naming: {appName}-{environment}-{suffix}
-var storageAccountName = '${appName}-${environment}-sa'
-var functionAppName = '${appName}-${environment}-func'
-var logAnalyticsWorkspaceName = '${appName}-${environment}-law'
-var applicationInsightsName = '${appName}-${environment}-ai'
-var hostingPlanName = '${appName}-${environment}-plan'
-
 // Storage account + containers
 module storage 'modules/storage.bicep' = {
   name: 'storageDeployment'
@@ -59,8 +52,7 @@ module functionapp 'modules/functionapp.bicep' = {
     environment: environment
     location: location
     tags: tags
-    storageAccountId: storage.outputs.storageAccountId
-    storageAccountName: storage.outputs.storageAccountName
+    storageConnectionString: storage.outputs.storageConnectionString
     logAnalyticsWorkspaceId: monitoring.outputs.logAnalyticsWorkspaceId
     applicationInsightsConnectionString: monitoring.outputs.applicationInsightsConnectionString
   }
