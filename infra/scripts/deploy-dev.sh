@@ -3,7 +3,7 @@ set -euo pipefail
 
 SUBSCRIPTION_ID="${SUBSCRIPTION_ID:-}"
 RESOURCE_GROUP_NAME="${RESOURCE_GROUP_NAME:-semex-dev-rg}"
-LOCATION="${LOCATION:-eastus}"
+LOCATION="${LOCATION:-austriaeast}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PARAM_FILE="${SCRIPT_DIR}/../parameters.dev.json"
 DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-semex-dev-deployment}"
