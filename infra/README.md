@@ -108,6 +108,27 @@ The script will:
 - Run a what-if against `infra/main.bicep` with `parameters.prod.json`.
 - Apply the deployment.
 
+### Removing resources
+
+To remove all deployed resources for an environment, delete the resource group. This permanently deletes the storage account, function app, monitoring resources, and any data in them.
+
+**Dev:**
+
+```bash
+az account set --subscription "<your-subscription-id>"
+az group delete --name semex-dev-rg --no-wait
+```
+
+**Prod:**
+
+```bash
+az account set --subscription "<your-subscription-id>"
+az group delete --name semex-prod-rg --no-wait
+```
+
+- `--no-wait` returns immediately while Azure deletes the group in the background. Omit it to block until deletion completes.
+- Azure may prompt for confirmation; use `--yes` (or `-y`) to skip the prompt in scripts or non-interactive use.
+
 ### Troubleshooting: Connection reset (10054)
 
 If `az deployment group what-if` or `az deployment group create` fails with `ConnectionResetError(10054)` or "connection was forcibly closed", common causes are:

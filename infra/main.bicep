@@ -20,6 +20,16 @@ param retentionDays int = 7
 @description('Common resource tags.')
 param tags object = {}
 
+@description('Cosmos DB capacity mode: serverless or provisioned. Default serverless.')
+@allowed([
+  'serverless'
+  'provisioned'
+])
+param cosmosCapacityMode string = 'serverless'
+
+@description('Cosmos DB database throughput (RU/s). Only used when cosmosCapacityMode is provisioned.')
+param cosmosDatabaseThroughput int = 400
+
 // Storage account + containers
 module storage 'modules/storage.bicep' = {
   name: 'storageDeployment'
@@ -44,6 +54,19 @@ module monitoring 'modules/monitoring.bicep' = {
   }
 }
 
+// Cosmos DB: SQL API account, database (semex), container (documents)
+module cosmos 'modules/cosmos.bicep' = {
+  name: 'cosmosDeployment'
+  params: {
+    appName: appName
+    environment: environment
+    location: location
+    tags: tags
+    cosmosCapacityMode: cosmosCapacityMode
+    databaseThroughput: cosmosDatabaseThroughput
+  }
+}
+
 // Function App + Consumption plan
 module functionapp 'modules/functionapp.bicep' = {
   name: 'functionAppDeployment'
@@ -55,6 +78,10 @@ module functionapp 'modules/functionapp.bicep' = {
     storageConnectionString: storage.outputs.storageConnectionString
     logAnalyticsWorkspaceId: monitoring.outputs.logAnalyticsWorkspaceId
     applicationInsightsConnectionString: monitoring.outputs.applicationInsightsConnectionString
+    cosmosEndpoint: cosmos.outputs.cosmosEndpoint
+    cosmosKey: cosmos.outputs.cosmosPrimaryKey
+    cosmosDbName: cosmos.outputs.cosmosDbName
+    cosmosContainerName: cosmos.outputs.cosmosContainerName
   }
 }
 
@@ -67,6 +94,7 @@ module rbac 'modules/rbac.bicep' = {
     storageAccountId: storage.outputs.storageAccountId
     storageAccountName: storage.outputs.storageAccountName
     principalId: functionapp.outputs.functionAppPrincipalId
+    cosmosAccountName: cosmos.outputs.cosmosAccountName
   }
 }
 
@@ -84,3 +112,12 @@ output applicationInsightsName string = monitoring.outputs.applicationInsightsNa
 
 @description('Name of the Log Analytics workspace.')
 output logAnalyticsWorkspaceName string = monitoring.outputs.logAnalyticsWorkspaceName
+
+@description('Name of the Cosmos DB account.')
+output cosmosAccountName string = cosmos.outputs.cosmosAccountName
+
+@description('Name of the Cosmos DB (database).')
+output cosmosDbName string = cosmos.outputs.cosmosDbName
+
+@description('Name of the Cosmos DB container.')
+output cosmosContainerName string = cosmos.outputs.cosmosContainerName
