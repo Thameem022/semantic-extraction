@@ -22,6 +22,18 @@ param logAnalyticsWorkspaceId string
 @description('Application Insights connection string.')
 param applicationInsightsConnectionString string
 
+@description('Cosmos DB endpoint URL.')
+param cosmosEndpoint string
+
+@description('Cosmos DB primary key (will move to Key Vault later).')
+param cosmosKey string
+
+@description('Cosmos DB database name.')
+param cosmosDbName string
+
+@description('Cosmos DB container name.')
+param cosmosContainerName string
+
 @description('App Service Plan SKU: B1 (Basic) works without Consumption quota; use Y1 for Consumption when quota is available.')
 param hostingPlanSku string = 'B1'
 
@@ -66,7 +78,11 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
         { name: 'FUNCTIONS_WORKER_RUNTIME', value: 'python' }
         { name: 'APPINSIGHTS_CONNECTIONSTRING', value: applicationInsightsConnectionString }
         { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: applicationInsightsConnectionString }
-        { name: 'WEBSITE_CONTENTOVERVNET', value: '1' }
+        { name: 'COSMOS_ENDPOINT', value: cosmosEndpoint }
+        { name: 'COSMOS_KEY', value: cosmosKey }
+        { name: 'COSMOS_DB_NAME', value: cosmosDbName }
+        { name: 'COSMOS_CONTAINER_NAME', value: cosmosContainerName }
+          { name: 'RAW_CONTAINER_NAME', value: 'raw' }
       ]
     }
   }
