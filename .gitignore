@@ -1,0 +1,53 @@
+########################
+# OS / editor cruft
+########################
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+########################
+# Python
+########################
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+########################
+# Virtual environments
+########################
+.venv/
+venv/
+env/
+
+########################
+# Azure Functions local
+########################
+# Local secrets & connection strings (keep only the *.example file in git)
+local.settings.json
+
+# Azure Functions tooling
+.azurefunctions/
+.funcignore
+
+########################
+# Build / deployment artifacts
+########################
+functionapp.zip
+*.zip
+
+########################
+# Node (if added later)
+########################
+node_modules/
+npm-debug.log*
+yarn-error.log*
+

@@ -1,0 +1,97 @@
+# Semantic Extraction
+
+Pipeline for ingesting policy documents into Cosmos DB and raw blob storage.
+
+## Architecture (achieved so far)
+
+End-to-end flow that is deployed and working:
+
+1. **Blob upload** → User (or system) uploads a file to the **incoming** container (e.g. `auto/sample.pdf`).
+2. **Blob trigger** → Azure Function **fn_ingest_blob** fires on `incoming/{name}`.
+3. **Function logic** → Reads blob, computes SHA-256, gets properties/metadata, derives `policyType` (metadata or path prefix) and `original_filename`, then:
+   - **Cosmos DB** – Upserts a document in **semex** / **documents** with `id`, `docId`, `filename`, `uploadedAtUtc`, `policyType`, `sha256`, `status: "RECEIVED"`, and blob metadata (duplicate SHA-256 is handled without failing the run).
+   - **Raw storage** – Server-side copy to **raw** at `raw/{docId}/{original_filename}`.
+   - **Cleanup** – Deletes the original blob from **incoming**.
+
+**Components:**
+
+| Component | Role |
+|-----------|------|
+| **Storage account** | Containers: `incoming`, `raw`, `duplicates`, `rejected`. `AzureWebJobsStorage` + Function App uses it for runtime and blob access. |
+| **Cosmos DB (SQL)** | Account + database **semex** + container **documents** (partition key `/policyType`, unique key `/sha256`). Stores one document per ingested file. |
+| **Function App** | Linux, Python 3.12, v4. Single function **fn_ingest_blob** (blob trigger). Uses **DefaultAzureCredential** for Cosmos; connection string for Storage. |
+| **RBAC** | Function App managed identity has **Cosmos DB Built-in Data Contributor** (data plane, `sqlRoleAssignments`) and **Storage Blob Data Contributor** on the storage account. |
+
+**Deploy layout that works:** Zip must have `host.json` and `requirements.txt` at the **root**, and function folders (e.g. `fn_ingest_blob/`) also at the root (i.e. zip the *contents* of `functions/`, not the `functions/` folder itself). `host.json` must use an extension bundle that includes Blob Storage bindings (e.g. `Microsoft.Azure.Functions.ExtensionBundle` version `[4.*, 5.0.0)`).
+
+**Verified:** Upload to `incoming` (e.g. `auto/sample3.pdf`) → document in Cosmos with `status: RECEIVED` and blob at `raw/{docId}/sample3.pdf` (and source removed from `incoming`).
+
+---
+
+## Milestone 1 test
+
+1. **Deploy infra**
+
+   ```bash
+   cd infra/scripts
+   export SUBSCRIPTION_ID="<your-subscription-id>"
+   ./deploy-dev.sh
+   ```
+
+2. **Deploy function code**
+
+   From the repo root. Preferred: use a Python 3.12 virtual environment to avoid version mismatch.
+
+   **Option A – Core Tools (remote build):**
+   ```bash
+   func azure functionapp publish semex-dev-func --python
+   ```
+
+   **Option B – Zip deploy (if Option A times out on SCM):**  
+   Zip must have `host.json` and `requirements.txt` at root and each function folder (e.g. `fn_ingest_blob/`) at root too (not under `functions/`):
+   ```bash
+   zip -r functionapp.zip host.json requirements.txt
+   cd functions && zip -r ../functionapp.zip . && cd ..
+   az functionapp deployment source config-zip \
+     -g semex-dev-rg -n semex-dev-func \
+     --src functionapp.zip --build-remote
+   rm functionapp.zip
+   ```
+
+   Or run the helper script:
+   ```bash
+   ./scripts/deploy-function.sh
+   ```
+
+   Use the actual Function App name from your deployment outputs (e.g. from `az deployment group show ... --query "properties.outputs.functionAppName.value"`).
+
+   **If you see SCM timeouts or JSON parse errors:** `WEBSITE_CONTENTOVERVNET` was removed from the Function App (no VNet in use). Redeploy infra (`./deploy-dev.sh`), wait 2–3 minutes, then retry.
+
+3. **Upload a PDF to incoming**
+
+   Example using Azure CLI:
+
+   ```bash
+   STORAGE_ACCOUNT="<storage-account-name-from-outputs>"
+   az storage blob upload \
+     --account-name "$STORAGE_ACCOUNT" \
+     --container-name incoming \
+     --name "test-policy/sample.pdf" \
+     --file ./sample.pdf
+   ```
+
+   Or with SAS or connection string:
+
+   ```bash
+   az storage blob upload \
+     --connection-string "<connection-string>" \
+     --container-name incoming \
+     --name "test-policy/sample.pdf" \
+     --file ./sample.pdf
+   ```
+
+4. **Verify**
+
+   - Cosmos doc created with `status: RECEIVED` and `id`/`docId` populated.
+   - Raw blob exists at `raw/{docId}/{filename}`.
+   - Function logs show step markers: `RECEIVED`, `COSMOS_UPSERT_OK`, `COPY_STARTED`, `COPY_SUCCEEDED`, `INCOMING_DELETED`.
