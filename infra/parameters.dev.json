@@ -11,6 +11,15 @@
     "location": {
       "value": "austriaeast"
     },
+    "documentIntelligenceLocation": {
+      "value": "southeastasia"
+    },
+    "cosmosLocation": {
+      "value": "southeastasia"
+    },
+    "documentIntelligenceRestoreSoftDeleted": {
+      "value": false
+    },
     "retentionDays": {
       "value": 7
     },

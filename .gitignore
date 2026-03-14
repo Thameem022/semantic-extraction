@@ -44,6 +44,21 @@ local.settings.json
 functionapp.zip
 *.zip
 
+# E2E test temp file (script creates and deletes; ignore if it remains)
+.test-sample.txt
+
+########################
+# Local test assets
+########################
+test*.pdf
+
+########################
+# Environment / secrets
+########################
+.env
+.env.local
+.env.*.local
+
 ########################
 # Node (if added later)
 ########################

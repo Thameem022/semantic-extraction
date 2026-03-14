@@ -95,3 +95,45 @@ End-to-end flow that is deployed and working:
    - Cosmos doc created with `status: RECEIVED` and `id`/`docId` populated.
    - Raw blob exists at `raw/{docId}/{filename}`.
    - Function logs show step markers: `RECEIVED`, `COSMOS_UPSERT_OK`, `COPY_STARTED`, `COPY_SUCCEEDED`, `INCOMING_DELETED`.
+
+**Quick E2E test (ingest + OCR):**
+
+   From repo root (uses storage account in the same resource group):
+
+   ```bash
+   ./scripts/test-e2e.sh
+   ```
+
+   Or with a specific file (e.g. a PDF for full OCR):
+
+   ```bash
+   ./scripts/test-e2e.sh /path/to/sample.pdf
+   ```
+
+   Then wait 30–60 seconds and check:
+   - Cosmos: document moves from `RECEIVED` → `OCR_STARTED` → `OCR_COMPLETE`.
+   - Storage: `raw/<docId>/<filename>`, `ocr-raw/<docId>/document_intelligence.json`, `ocr-layout/<docId>/layout.json`.
+   - Log stream: `az webapp log tail -g semex-dev-rg -n semex-dev-func`.
+
+---
+
+## Running unit tests
+
+Use the project venv and run tests from repo root:
+
+```bash
+# One-time: create venv and install deps
+python3 -m venv .venv
+.venv/bin/pip install -r requirements-dev.txt
+
+# Run tests (uses .venv automatically)
+./scripts/run-tests.sh
+```
+
+Or with coverage:
+
+```bash
+.venv/bin/python -m pytest tests/ -v --cov=shared --cov-report=term-missing
+```
+
+Tests live under `tests/unit/` and cover `shared.blob_paths`, `shared.statuses`, `shared.layout_normalizer`, and `fn_run_ocr._parse_raw_blob_name`.
