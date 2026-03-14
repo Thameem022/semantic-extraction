@@ -34,6 +34,13 @@ param cosmosDbName string
 @description('Cosmos DB container name.')
 param cosmosContainerName string
 
+@description('Azure AI Document Intelligence endpoint (e.g. https://<name>.cognitiveservices.azure.com).')
+param documentIntelligenceEndpoint string
+
+@description('Azure AI Document Intelligence API key.')
+@secure()
+param documentIntelligenceApiKey string
+
 @description('App Service Plan SKU: B1 (Basic) works without Consumption quota; use Y1 for Consumption when quota is available.')
 param hostingPlanSku string = 'B1'
 
@@ -82,7 +89,9 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
         { name: 'COSMOS_KEY', value: cosmosKey }
         { name: 'COSMOS_DB_NAME', value: cosmosDbName }
         { name: 'COSMOS_CONTAINER_NAME', value: cosmosContainerName }
-          { name: 'RAW_CONTAINER_NAME', value: 'raw' }
+        { name: 'RAW_CONTAINER_NAME', value: 'raw' }
+        { name: 'DOCUMENT_INTELLIGENCE_ENDPOINT', value: documentIntelligenceEndpoint }
+        { name: 'DOCUMENT_INTELLIGENCE_API_KEY', value: documentIntelligenceApiKey }
       ]
     }
   }
