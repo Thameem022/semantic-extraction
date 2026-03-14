@@ -38,14 +38,14 @@ var cosmosAccountName = '${prefix}${uniqueString(resourceGroup().id)}'
 
 resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' = {
   name: cosmosAccountName
-  location: 'southeastasia'
+  location: location
   kind: 'GlobalDocumentDB'
   tags: tags
   properties: {
     databaseAccountOfferType: 'Standard'
     locations: [
       {
-        locationName: 'southeastasia'
+        locationName: location
         failoverPriority: 0
       }
     ]

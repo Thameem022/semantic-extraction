@@ -14,11 +14,25 @@ param environment string
 @description('Azure region for all resources.')
 param location string
 
+@description('Azure region for Document Intelligence (must be in your subscription allowed list and support Cognitive Services).')
+@allowed([
+  'southeastasia'
+  'uaenorth'
+  'koreacentral'
+])
+param documentIntelligenceLocation string = 'southeastasia'
+
+@description('Set to true to restore a soft-deleted Document Intelligence account (use once after FlagMustBeSetForRestore, then set back to false).')
+param documentIntelligenceRestoreSoftDeleted bool = false
+
 @description('Retention in days for logs and soft delete.')
 param retentionDays int = 7
 
 @description('Common resource tags.')
 param tags object = {}
+
+@description('Azure region for Cosmos DB. Use a region with capacity if the main location has high demand (e.g. southeastasia).')
+param cosmosLocation string = 'southeastasia'
 
 @description('Cosmos DB capacity mode: serverless or provisioned. Default serverless.')
 @allowed([
@@ -60,10 +74,22 @@ module cosmos 'modules/cosmos.bicep' = {
   params: {
     appName: appName
     environment: environment
-    location: location
+    location: cosmosLocation
     tags: tags
     cosmosCapacityMode: cosmosCapacityMode
     databaseThroughput: cosmosDatabaseThroughput
+  }
+}
+
+// Azure AI Document Intelligence (OCR / prebuilt-layout)
+module documentintelligence 'modules/documentintelligence.bicep' = {
+  name: 'documentIntelligenceDeployment'
+  params: {
+    appName: appName
+    environment: environment
+    location: documentIntelligenceLocation
+    tags: tags
+    restoreSoftDeletedAccount: documentIntelligenceRestoreSoftDeleted
   }
 }
 
@@ -82,6 +108,8 @@ module functionapp 'modules/functionapp.bicep' = {
     cosmosKey: cosmos.outputs.cosmosPrimaryKey
     cosmosDbName: cosmos.outputs.cosmosDbName
     cosmosContainerName: cosmos.outputs.cosmosContainerName
+    documentIntelligenceEndpoint: documentintelligence.outputs.documentIntelligenceEndpoint
+    documentIntelligenceApiKey: documentintelligence.outputs.documentIntelligencePrimaryKey
   }
 }
 
@@ -121,3 +149,6 @@ output cosmosDbName string = cosmos.outputs.cosmosDbName
 
 @description('Name of the Cosmos DB container.')
 output cosmosContainerName string = cosmos.outputs.cosmosContainerName
+
+@description('Name of the Azure AI Document Intelligence account.')
+output documentIntelligenceAccountName string = documentintelligence.outputs.documentIntelligenceAccountName

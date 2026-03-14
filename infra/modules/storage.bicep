@@ -91,6 +91,22 @@ resource containerRejected 'Microsoft.Storage/storageAccounts/blobServices/conta
   }
 }
 
+resource containerOcrRaw 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
+  parent: blobService
+  name: 'ocr-raw'
+  properties: {
+    publicAccess: 'None'
+  }
+}
+
+resource containerOcrLayout 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
+  parent: blobService
+  name: 'ocr-layout'
+  properties: {
+    publicAccess: 'None'
+  }
+}
+
 var storageAccountKey = storageAccount.listKeys().keys[0].value
 var storageConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccountKey};EndpointSuffix=core.windows.net'
 

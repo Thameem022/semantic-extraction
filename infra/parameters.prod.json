@@ -11,6 +11,12 @@
     "location": {
       "value": "eastus"
     },
+    "documentIntelligenceLocation": {
+      "value": "southeastasia"
+    },
+    "cosmosLocation": {
+      "value": "southeastasia"
+    },
     "retentionDays": {
       "value": 30
     },

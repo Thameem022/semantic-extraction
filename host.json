@@ -3,7 +3,12 @@
   "logging": {
     "logLevel": {
       "default": "Information",
-      "Host.Results": "Error"
+      "Host.Results": "Error",
+      "Azure.Core": "Warning",
+      "Azure.Storage": "Warning",
+      "Azure.Storage.Blobs": "Warning",
+      "Azure.Storage.Queues": "Warning",
+      "Host.Triggers.Blobs": "Warning"
     }
   },
   "extensionBundle": {
