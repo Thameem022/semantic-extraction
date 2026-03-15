@@ -9,7 +9,7 @@ from azure.cosmos import CosmosClient
 from azure.cosmos.aio import CosmosClient as CosmosClientAio
 from azure.identity import DefaultAzureCredential
 
-from shared.statuses import is_valid_status
+from .statuses import is_valid_status
 
 _UNSET = object()
 

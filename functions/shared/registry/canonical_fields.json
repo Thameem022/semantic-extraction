@@ -1,0 +1,30 @@
+[
+  {
+    "id": "invoice_date",
+    "name": "Invoice Date",
+    "description": "Date the invoice was issued",
+    "dataType": "date",
+    "aliases": ["Date of Invoice", "Invoice date", "Date"]
+  },
+  {
+    "id": "vendor_name",
+    "name": "Vendor Name",
+    "description": "Name of the supplier or vendor",
+    "dataType": "string",
+    "aliases": ["Vendor", "Supplier", "Supplier Name", "From"]
+  },
+  {
+    "id": "total_amount",
+    "name": "Total Amount",
+    "description": "Total amount due on the invoice",
+    "dataType": "number",
+    "aliases": ["Total", "Amount Due", "Grand Total", "Total Due"]
+  },
+  {
+    "id": "invoice_number",
+    "name": "Invoice Number",
+    "description": "Unique identifier or number of the invoice",
+    "dataType": "string",
+    "aliases": ["Invoice #", "Inv No", "Invoice No", "Number"]
+  }
+]
