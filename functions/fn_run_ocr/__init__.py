@@ -78,8 +78,9 @@ def _parse_raw_blob_name(blob_name: str) -> Tuple[str, str, Optional[str]]:
     if not blob_name:
         raise ValueError("Blob name is empty")
 
-    path = Path(blob_name)
-    parts = path.parts
+    # Use raw string splitting instead of pathlib parts so we can preserve
+    # empty path segments (e.g. raw//file.pdf) for accurate validation errors.
+    parts = blob_name.split("/")
 
     if len(parts) < 2:
         raise ValueError(f"Unexpected blob name format: {blob_name!r}")
@@ -97,15 +98,8 @@ def _parse_raw_blob_name(blob_name: str) -> Tuple[str, str, Optional[str]]:
             f"Expected blob path to start with 'raw/' or 'incoming/test/', got: {blob_name!r}"
         )
 
-    # New-style path with policy type encoded: raw/{policyType}/{docId}/{filename...}
-    if len(parts) >= 4:
-        _, policy_type, doc_id, *rest = parts
-        filename = "/".join(rest)
-        if not doc_id:
-            raise ValueError(f"Missing docId segment in blob name: {blob_name!r}")
-        if not filename:
-            raise ValueError(f"Missing filename segment in blob name: {blob_name!r}")
-        return doc_id, filename, policy_type
+    if len(parts) < 3:
+        raise ValueError(f"Unexpected blob name format: {blob_name!r}")
 
     # Legacy path: raw/{docId}/{filename...}
     _, doc_id, *rest = parts
@@ -114,6 +108,20 @@ def _parse_raw_blob_name(blob_name: str) -> Tuple[str, str, Optional[str]]:
         raise ValueError(f"Missing docId segment in blob name: {blob_name!r}")
     if not filename:
         raise ValueError(f"Missing filename segment in blob name: {blob_name!r}")
+
+    # New-style path: raw/{policyType}/{docId}/{filename...}
+    # Heuristic: only treat as new-style when the third segment looks like a
+    # document id (commonly UUID-like and includes a hyphen). Otherwise keep
+    # compatibility with legacy paths where filename can include subfolders.
+    if len(parts) >= 4:
+        policy_type = parts[1]
+        potential_doc_id = parts[2]
+        if policy_type and potential_doc_id and "-" in potential_doc_id:
+            new_style_filename = "/".join(parts[3:])
+            if not new_style_filename:
+                raise ValueError(f"Missing filename segment in blob name: {blob_name!r}")
+            return potential_doc_id, new_style_filename, policy_type
+
     return doc_id, filename, None
 
 

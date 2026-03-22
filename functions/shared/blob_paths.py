@@ -5,9 +5,11 @@ from typing import Final
 
 OCR_RAW_CONTAINER: Final[str] = "ocr-raw"
 OCR_LAYOUT_CONTAINER: Final[str] = "ocr-layout"
+CANDIDATES_CONTAINER: Final[str] = "candidates"
 
 RAW_OCR_FILENAME: Final[str] = "document_intelligence.json"
 LAYOUT_FILENAME: Final[str] = "layout.json"
+CANDIDATES_FILENAME: Final[str] = "candidates.json"
 
 
 def _validate_doc_id(doc_id: str) -> str:
@@ -49,4 +51,16 @@ def get_ocr_layout_blob_path(doc_id: str) -> str:
     """
     safe_doc_id = _validate_doc_id(doc_id)
     return f"{OCR_LAYOUT_CONTAINER}/{safe_doc_id}/{LAYOUT_FILENAME}"
+
+
+def get_candidates_blob_path(doc_id: str) -> str:
+    """
+    Return the blob path for candidate output for a given document.
+
+    Example:
+        >>> get_candidates_blob_path("1234")
+        'candidates/1234/candidates.json'
+    """
+    safe_doc_id = _validate_doc_id(doc_id)
+    return f"{CANDIDATES_CONTAINER}/{safe_doc_id}/{CANDIDATES_FILENAME}"
 
