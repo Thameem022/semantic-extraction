@@ -41,6 +41,19 @@ param documentIntelligenceEndpoint string
 @secure()
 param documentIntelligenceApiKey string
 
+@description('Azure OpenAI HTTPS endpoint (Cognitive Services OpenAI account).')
+param azureOpenAiEndpoint string
+
+@description('Azure OpenAI API key (primary). Prefer Key Vault reference in production.')
+@secure()
+param azureOpenAiApiKey string
+
+@description('Azure OpenAI chat deployment name (must match a deployment on the account).')
+param azureOpenAiDeploymentName string
+
+@description('Azure OpenAI API version for REST client.')
+param azureOpenAiApiVersion string = '2024-08-01-preview'
+
 @description('App Service Plan SKU: B1 (Basic) works without Consumption quota; use Y1 for Consumption when quota is available.')
 param hostingPlanSku string = 'B1'
 
@@ -92,6 +105,10 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
         { name: 'RAW_CONTAINER_NAME', value: 'raw' }
         { name: 'DOCUMENT_INTELLIGENCE_ENDPOINT', value: documentIntelligenceEndpoint }
         { name: 'DOCUMENT_INTELLIGENCE_API_KEY', value: documentIntelligenceApiKey }
+        { name: 'AZURE_OPENAI_ENDPOINT', value: azureOpenAiEndpoint }
+        { name: 'AZURE_OPENAI_API_KEY', value: azureOpenAiApiKey }
+        { name: 'AZURE_OPENAI_DEPLOYMENT_NAME', value: azureOpenAiDeploymentName }
+        { name: 'AZURE_OPENAI_API_VERSION', value: azureOpenAiApiVersion }
       ]
     }
   }

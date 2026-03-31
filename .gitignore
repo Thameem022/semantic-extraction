@@ -47,6 +47,9 @@ functionapp.zip
 # E2E test temp file (script creates and deletes; ignore if it remains)
 .test-sample.txt
 
+# Downloaded candidate outputs (generated artifacts)
+downloads/candidates/
+
 ########################
 # PDFs (local test assets; do not commit)
 ########################

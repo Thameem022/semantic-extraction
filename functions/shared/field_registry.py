@@ -130,6 +130,7 @@ CANONICAL_FIELD_REGISTRY: dict[str, dict[str, object]] = {
     },
     "website": {
         "aliases": [
+            "Applicant Website:",
             "Website Address:",
             "Website:",
             "Company Website:",
@@ -151,6 +152,7 @@ CANONICAL_FIELD_REGISTRY: dict[str, dict[str, object]] = {
             "e-Mail:",
             "E-mail:",
             "Email:",
+            "Email Address:",
         ],
     },
     "business_description": {
@@ -161,6 +163,24 @@ CANONICAL_FIELD_REGISTRY: dict[str, dict[str, object]] = {
             "Nature of Business:",
             "Business Description:",
         ],
+    },
+    "revenue": {
+        "aliases": [
+            "Revenue",
+            "Gross Revenue",
+            "Total Revenue",
+            "Sales",
+        ],
+        "regex": CURRENCY_PATTERN,
+    },
+    "profit": {
+        "aliases": [
+            "Profit",
+            "Operating Income",
+            "Gross Profit",
+            "Net Profit",
+        ],
+        "regex": CURRENCY_PATTERN,
     },
 }
 

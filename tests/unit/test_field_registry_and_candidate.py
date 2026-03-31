@@ -28,6 +28,21 @@ class TestNormalizeValue:
         assert normalize_value("  ABC-123  ", "policy_number") == "ABC-123"
 
 
+class TestCandidateSource:
+    def test_accepts_llm_table_source(self):
+        candidate = Candidate(
+            fieldId="emp_part_time",
+            rawValue="12",
+            normalizedValue="12",
+            confidence=0.85,
+            source="LLM-TABLE",
+            pageNumber=1,
+            boundingBox=[1.0, 2.0, 3.0, 2.0, 3.0, 3.0, 1.0, 3.0],
+            contextChunk="LLM table extraction",
+        )
+        assert candidate.source == "LLM-TABLE"
+
+
 class TestCandidateBoundingBox:
     def test_accepts_exactly_8_floats(self):
         candidate = Candidate(

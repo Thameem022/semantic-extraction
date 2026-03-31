@@ -33,7 +33,7 @@ class Candidate(BaseModel):
     @classmethod
     def _validate_source(cls, value: str) -> str:
         tokens = [token.strip() for token in str(value).split("|") if token.strip()]
-        allowed = {"KV", "Table", "Pattern"}
+        allowed = {"KV", "Table", "Pattern", "LLM-TABLE"}
         if not tokens or any(token not in allowed for token in tokens):
-            raise ValueError("source must contain one or more of: KV, Table, Pattern")
+            raise ValueError("source must contain one or more of: KV, Table, Pattern, LLM-TABLE")
         return " | ".join(dict.fromkeys(tokens))

@@ -28,9 +28,15 @@ logging.getLogger("azure.storage").setLevel(logging.WARNING)
 COSMOS_LOOKUP_RETRY_ATTEMPTS = 5
 COSMOS_LOOKUP_RETRY_SLEEP_SEC = 2.0
 OVERLAP_THRESHOLD = 0.5
-SOURCE_PRIORITY = {"Pattern": 1, "Table": 2, "KV": 3}
+# Higher value wins in _prefer_candidate / _merge_sources. KV beats Table and LLM-TABLE for conflicts.
+SOURCE_PRIORITY = {"Pattern": 1, "Table": 2, "LLM-TABLE": 2, "KV": 3}
 
-# CandidateBuilder.build() returns only deterministic KV matches for Applicant Info.
+# Overlapping bbox dedupe: always keep KV for these fields if a KV candidate is present.
+_KV_DETERMINISTIC_FIELD_IDS: frozenset[str] = frozenset(
+    {"applicant_name", "insured_address", "website", "email_address"}
+)
+
+# CandidateBuilder.build() returns KV + optional LLM table candidates for Applicant Info.
 _APPLICANT_INFO_FIELD_IDS = frozenset(
     {
         "applicant_name",
@@ -42,7 +48,20 @@ _APPLICANT_INFO_FIELD_IDS = frozenset(
         "website",
         "business_description",
         "emp_full_time",
+        "emp_part_time",
+        "emp_independent_contractors",
+        "emp_temporary_leased",
+        "emp_full_time_ca",
+        "emp_part_time_ca",
+        "total_assets",
+        "net_income",
+        "revenue",
+        "profit",
         "email_address",
+        "policy_number",
+        "effective_date",
+        "limit_employment_practices",
+        "retention_employment_practices",
     }
 )
 
@@ -181,7 +200,18 @@ def _source_rank(candidate: Candidate) -> int:
     return max(SOURCE_PRIORITY.get(token, 0) for token in tokens)
 
 
+def _candidate_includes_kv_source(candidate: Candidate) -> bool:
+    return "KV" in _source_tokens(candidate.source)
+
+
 def _prefer_candidate(a: Candidate, b: Candidate) -> Candidate:
+    if a.fieldId == b.fieldId and a.fieldId in _KV_DETERMINISTIC_FIELD_IDS:
+        a_kv = _candidate_includes_kv_source(a)
+        b_kv = _candidate_includes_kv_source(b)
+        if a_kv and not b_kv:
+            return a
+        if b_kv and not a_kv:
+            return b
     rank_a = _source_rank(a)
     rank_b = _source_rank(b)
     if rank_b > rank_a:
@@ -243,8 +273,8 @@ async def main(myblob: func.InputStream) -> None:
         layout_json = json.loads(payload.decode("utf-8"))
 
         builder = CandidateBuilder(layout_json)
-        # We only use build(), which returns kv_hunter() results (Applicant Info KV only).
-        combined = builder.build()
+        # build() returns deterministic KV first, then LLM table candidates for gaps.
+        combined = await builder.build()
         deduped = _deduplicate_candidates(combined)
         deduped = [c for c in deduped if c.fieldId in _APPLICANT_INFO_FIELD_IDS]
 

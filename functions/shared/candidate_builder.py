@@ -2,19 +2,68 @@
 
 from __future__ import annotations
 
+import json
+import logging
+import os
 import re
+from pathlib import Path
 from typing import Any
+
+from openai import AsyncAzureOpenAI
 
 from shared.field_registry import (
     APPLICANT_KV_ALLOWED_PAGES,
     APPLICANT_KV_FIELD_IDS,
     CANONICAL_FIELD_REGISTRY,
     COMBINED_INSURED_ADDRESS_LABEL_NORMS,
+    CURRENCY_PATTERN,
     DATE_PATTERN,
     normalize_kv_key_label,
     normalize_value,
 )
 from shared.models.candidate import Candidate
+from shared.models.cognitive_schema import CognitiveExtraction
+from shared.table_utils import serialize_tables_for_llm
+
+logger = logging.getLogger(__name__)
+
+_SHARED_DIR = Path(__file__).resolve().parent
+_COGNITIVE_PROMPT_PATH = _SHARED_DIR / "prompts" / "cognitive_extraction.txt"
+_OPENAI_CLIENT: AsyncAzureOpenAI | None = None
+
+# LLM-only canonical fields (must match CognitiveExtraction); KV fills first, then LLM for gaps.
+COGNITIVE_FIELD_IDS: tuple[str, ...] = (
+    "emp_full_time",
+    "emp_part_time",
+    "emp_independent_contractors",
+    "emp_temporary_leased",
+    "emp_full_time_ca",
+    "emp_part_time_ca",
+    "total_assets",
+    "net_income",
+    "revenue",
+    "profit",
+)
+
+_LLM_PROTECTED_FIELD_IDS: frozenset[str] = frozenset(
+    {"applicant_name", "insured_address", "website", "email_address"}
+)
+
+
+def get_openai_client() -> AsyncAzureOpenAI:
+    """Get a lazily initialized module-level Async Azure OpenAI client."""
+    global _OPENAI_CLIENT
+    if _OPENAI_CLIENT is None:
+        endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT", "").strip()
+        api_key = os.environ.get("AZURE_OPENAI_API_KEY", "").strip()
+        api_version = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-08-01-preview").strip()
+        _OPENAI_CLIENT = AsyncAzureOpenAI(
+            api_version=api_version or "2024-08-01-preview",
+            azure_endpoint=endpoint,
+            api_key=api_key,
+            timeout=60.0,
+        )
+    return _OPENAI_CLIENT
 
 
 class CandidateBuilder:
@@ -425,9 +474,143 @@ class CandidateBuilder:
 
         return candidates
 
-    def build(self) -> list[Candidate]:
-        """Build deterministic Applicant Info candidates from KV extraction."""
-        return self.kv_hunter()
+    def _select_llm_table_anchor(
+        self,
+        field_id: str,
+        raw_value: str,
+        table_blocks: list[dict[str, Any]],
+    ) -> tuple[int, list[float]]:
+        """Pick the best table anchor for an LLM field candidate."""
+        if not table_blocks:
+            return 1, [0.0] * 8
+
+        value_probe = str(raw_value).strip().lower()
+        keyword_map: dict[str, tuple[str, ...]] = {
+            "total_assets": ("total assets", "net assets", "assets", "financial summary"),
+            "net_income": ("net income", "income", "revenue", "financial summary"),
+            "revenue": ("revenue", "gross revenue", "sales", "financial summary"),
+            "profit": ("profit", "operating income", "net profit", "financial summary"),
+            "emp_full_time": ("full time", "employee", "headcount", "employees"),
+            "emp_part_time": ("part time", "employee", "headcount", "employees"),
+            "emp_independent_contractors": ("independent contractor", "contractor", "employee"),
+            "emp_temporary_leased": ("temporary", "leased", "employee"),
+            "emp_full_time_ca": ("california", "ca", "full time"),
+            "emp_part_time_ca": ("california", "ca", "part time"),
+        }
+        keywords = keyword_map.get(field_id, ())
+
+        for block in table_blocks:
+            text = str(block.get("markdown") or "").lower()
+            if value_probe and value_probe in text and (not keywords or any(k in text for k in keywords)):
+                return int(block.get("pageNumber") or 1), self._coerce_polygon(block.get("boundingBox"))
+
+        for block in table_blocks:
+            text = str(block.get("markdown") or "").lower()
+            if value_probe and value_probe in text:
+                return int(block.get("pageNumber") or 1), self._coerce_polygon(block.get("boundingBox"))
+
+        for block in table_blocks:
+            text = str(block.get("markdown") or "").lower()
+            if keywords and any(k in text for k in keywords):
+                return int(block.get("pageNumber") or 1), self._coerce_polygon(block.get("boundingBox"))
+
+        first = table_blocks[0]
+        return int(first.get("pageNumber") or 1), self._coerce_polygon(first.get("boundingBox"))
+
+    async def _resolve_complex_fields_via_llm(self) -> list[Candidate]:
+        """Extract table-only fields via Azure OpenAI JSON mode; returns empty on skip or failure."""
+        table_blocks = serialize_tables_for_llm(self.layout, max_pages=5)
+        markdown = "\n\n".join(str(block.get("markdown") or "") for block in table_blocks)
+        if not markdown.strip():
+            return []
+
+        endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT", "").strip()
+        api_key = os.environ.get("AZURE_OPENAI_API_KEY", "").strip()
+        deployment = os.environ.get("AZURE_OPENAI_DEPLOYMENT_NAME", "").strip()
+        if not endpoint or not api_key or not deployment:
+            logger.warning(
+                "Azure OpenAI environment not fully configured; skipping LLM table extraction",
+            )
+            return []
+
+        try:
+            system_prompt = _COGNITIVE_PROMPT_PATH.read_text(encoding="utf-8")
+            client = get_openai_client()
+            keys = ", ".join(COGNITIVE_FIELD_IDS)
+            user_content = (
+                "Extract values into a JSON object with exactly these keys "
+                f"(use null for missing values): {keys}.\n\n"
+                "Include headcount fields, total_assets, net_income, revenue, and profit from the tables "
+                "when present.\n\n"
+                "For net_income: if no row or column explicitly labeled Net Income (or net loss) is present, "
+                "but Operating Income is shown, use Operating Income as the value for net_income.\n\n"
+                "IMPORTANT: Return all numerical values as plain strings within the JSON object "
+                '(e.g., "5000" not 5000). Do not include currency symbols or commas.\n\n'
+                f"---\n\n{markdown}"
+            )
+            completion = await client.chat.completions.create(
+                model=deployment,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_content},
+                ],
+                response_format={"type": "json_object"},
+            )
+            raw_text = completion.choices[0].message.content
+            if not raw_text:
+                return []
+            data = json.loads(raw_text)
+            parsed = CognitiveExtraction.model_validate(data)
+        except Exception:
+            logger.exception("LLM cognitive table extraction failed")
+            return []
+
+        chunk = markdown if len(markdown) <= 2000 else f"{markdown[:2000]}…"
+
+        candidates: list[Candidate] = []
+        for field_id in COGNITIVE_FIELD_IDS:
+            if field_id in _LLM_PROTECTED_FIELD_IDS:
+                continue
+            raw_val = getattr(parsed, field_id, None)
+            if raw_val is None:
+                continue
+            raw_str = str(raw_val).strip()
+            if not raw_str:
+                continue
+            lowered = raw_str.lower()
+            if lowered in ("null", "none", "n/a"):
+                continue
+            cfg = CANONICAL_FIELD_REGISTRY.get(field_id, {})
+            if not isinstance(cfg, dict):
+                cfg = {}
+            anchor_page, anchor_bbox = self._select_llm_table_anchor(field_id, raw_str, table_blocks)
+            candidates.append(
+                Candidate(
+                    fieldId=field_id,
+                    rawValue=raw_str,
+                    normalizedValue=normalize_value(raw_str, self._field_type(field_id, cfg)),
+                    confidence=0.85,
+                    source="LLM-TABLE",
+                    pageNumber=anchor_page,
+                    boundingBox=anchor_bbox,
+                    contextChunk=chunk,
+                )
+            )
+        return candidates
+
+    async def build(self) -> list[Candidate]:
+        """Build Applicant Info candidates: deterministic KV first, then LLM table fill for gaps."""
+        kv = self.kv_hunter()
+        kv_ids = {c.fieldId for c in kv}
+        llm = await self._resolve_complex_fields_via_llm()
+        merged: list[Candidate] = list(kv)
+        for candidate in llm:
+            if candidate.fieldId in _LLM_PROTECTED_FIELD_IDS:
+                continue
+            if candidate.fieldId in kv_ids:
+                continue
+            merged.append(candidate)
+        return merged
 
     def _get_line_context(self, line_index: int | None) -> str:
         """Return current line + two lines preceding, across page boundaries."""
@@ -640,9 +823,14 @@ class CandidateBuilder:
         return None
 
     def _field_type(self, field_id: str, config: dict[str, Any]) -> str:
-        regex = str(config.get("regex") or "")
+        regex_raw = config.get("regex")
+        regex = str(regex_raw or "")
         if regex == DATE_PATTERN or "date" in field_id:
             return "date"
-        if "currency" in regex.lower() or any(token in field_id for token in ("limit", "retention", "amount")):
+        if (
+            "currency" in regex.lower()
+            or regex_raw == CURRENCY_PATTERN
+            or any(token in field_id for token in ("limit", "retention", "amount"))
+        ):
             return "currency"
         return field_id

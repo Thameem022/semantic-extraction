@@ -22,6 +22,18 @@ param location string
 ])
 param documentIntelligenceLocation string = 'southeastasia'
 
+@description('Azure region for Azure OpenAI. Pick a region where the deployment model/version is available for your subscription.')
+@allowed([
+  'eastus'
+  'eastus2'
+  'swedencentral'
+  'francecentral'
+  'uksouth'
+  'southeastasia'
+  'uaenorth'
+])
+param openAiLocation string = 'uaenorth'
+
 @description('Set to true to restore a soft-deleted Document Intelligence account (use once after FlagMustBeSetForRestore, then set back to false).')
 param documentIntelligenceRestoreSoftDeleted bool = false
 
@@ -93,6 +105,17 @@ module documentintelligence 'modules/documentintelligence.bicep' = {
   }
 }
 
+// Azure OpenAI (cognitive LLM extraction in candidate builder)
+module openai 'modules/openai.bicep' = {
+  name: 'openAiDeployment'
+  params: {
+    appName: appName
+    environment: environment
+    location: openAiLocation
+    tags: tags
+  }
+}
+
 // Function App + Consumption plan
 module functionapp 'modules/functionapp.bicep' = {
   name: 'functionAppDeployment'
@@ -110,6 +133,9 @@ module functionapp 'modules/functionapp.bicep' = {
     cosmosContainerName: cosmos.outputs.cosmosContainerName
     documentIntelligenceEndpoint: documentintelligence.outputs.documentIntelligenceEndpoint
     documentIntelligenceApiKey: documentintelligence.outputs.documentIntelligencePrimaryKey
+    azureOpenAiEndpoint: openai.outputs.openAiEndpoint
+    azureOpenAiApiKey: openai.outputs.openAiPrimaryKey
+    azureOpenAiDeploymentName: openai.outputs.openAiDeploymentName
   }
 }
 
@@ -123,6 +149,15 @@ module rbac 'modules/rbac.bicep' = {
     storageAccountName: storage.outputs.storageAccountName
     principalId: functionapp.outputs.functionAppPrincipalId
     cosmosAccountName: cosmos.outputs.cosmosAccountName
+  }
+}
+
+// OpenAI User role for Function App managed identity (keyless access to the OpenAI resource)
+module openaiRbac 'modules/openai-rbac.bicep' = {
+  name: 'openAiRbacDeployment'
+  params: {
+    openAiAccountName: openai.outputs.openAiAccountName
+    principalId: functionapp.outputs.functionAppPrincipalId
   }
 }
 
@@ -152,3 +187,12 @@ output cosmosContainerName string = cosmos.outputs.cosmosContainerName
 
 @description('Name of the Azure AI Document Intelligence account.')
 output documentIntelligenceAccountName string = documentintelligence.outputs.documentIntelligenceAccountName
+
+@description('Name of the Azure OpenAI account.')
+output openAiAccountName string = openai.outputs.openAiAccountName
+
+@description('Azure OpenAI HTTPS endpoint.')
+output openAiEndpoint string = openai.outputs.openAiEndpoint
+
+@description('Azure OpenAI model deployment name configured for the Function App.')
+output openAiDeploymentName string = openai.outputs.openAiDeploymentName
