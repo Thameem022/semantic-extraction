@@ -137,3 +137,52 @@ Or with coverage:
 ```
 
 Tests live under `tests/unit/` and cover `shared.blob_paths`, `shared.statuses`, `shared.layout_normalizer`, and `fn_run_ocr._parse_raw_blob_name`.
+
+---
+
+## Local Development (Frontend + API)
+
+### 1. Configure backend settings
+
+1. Update `local.settings.json` at the repo root with your Cosmos DB values:
+   - `COSMOS_ENDPOINT`
+   - `COSMOS_KEY`
+   - `COSMOS_DB_NAME`
+   - `COSMOS_CONTAINER_NAME`
+2. Ensure `AzureWebJobsStorage` is set to your Azure Storage connection string.
+
+### 2. Start the Azure Functions host
+
+From the repo root:
+
+```bash
+func start --python
+```
+
+The HTTP endpoints will be available at `http://localhost:7071/api/`:
+- `POST /api/fn_http_upload`
+- `GET  /api/fn_http_status?docId=<uuid>`
+
+### 3. Start the web UI
+
+From the repo root:
+
+```bash
+cd frontend
+cat > .env.local <<'EOF'
+NEXT_PUBLIC_FUNCTION_BASE_URL=http://localhost:7071
+EOF
+npm install
+npm run dev
+```
+
+Then open `http://localhost:3000`.
+
+The frontend uses `NEXT_PUBLIC_FUNCTION_BASE_URL` (defaults to `http://localhost:7071`).
+
+### 4. Upload + view extraction results
+
+Use the drag-and-drop zone to upload a PDF. The UI will:
+1. Call `fn_http_upload` to create a `docId`
+2. Poll `fn_http_status` every ~2.5 seconds until `CANDIDATES_GENERATED`
+3. Render the returned extracted field candidates

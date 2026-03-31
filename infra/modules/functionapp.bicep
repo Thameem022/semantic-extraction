@@ -114,6 +114,21 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
   }
 }
 
+// Allow the local web app origin to call the Function App over HTTP.
+// This config is applied at the App Service "web" settings level (not per-function).
+resource functionAppCors 'Microsoft.Web/sites/config@2023-01-01' = {
+  parent: functionApp
+  name: 'web'
+  properties: {
+    cors: {
+      allowedOrigins: [
+        'http://localhost:3000'
+      ]
+      supportCredentials: false
+    }
+  }
+}
+
 resource functionDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
   name: '${functionApp.name}-diag'
   scope: functionApp

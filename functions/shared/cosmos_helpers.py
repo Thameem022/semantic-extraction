@@ -24,8 +24,12 @@ def _get_sync_cosmos_client() -> CosmosClient:
     global _COSMOS_CLIENT
     if _COSMOS_CLIENT is None:
         cosmos_endpoint = os.environ["COSMOS_ENDPOINT"]
-        cred = DefaultAzureCredential()
-        _COSMOS_CLIENT = CosmosClient(cosmos_endpoint, credential=cred)
+        cosmos_key = os.environ.get("COSMOS_KEY", "").strip()
+        if cosmos_key:
+            _COSMOS_CLIENT = CosmosClient(cosmos_endpoint, credential=cosmos_key)
+        else:
+            cred = DefaultAzureCredential()
+            _COSMOS_CLIENT = CosmosClient(cosmos_endpoint, credential=cred)
     return _COSMOS_CLIENT
 
 
@@ -34,8 +38,12 @@ def _get_async_cosmos_client() -> CosmosClientAio:
     global _COSMOS_CLIENT_AIO
     if _COSMOS_CLIENT_AIO is None:
         cosmos_endpoint = os.environ["COSMOS_ENDPOINT"]
-        cred = DefaultAzureCredential()
-        _COSMOS_CLIENT_AIO = CosmosClientAio(cosmos_endpoint, credential=cred)
+        cosmos_key = os.environ.get("COSMOS_KEY", "").strip()
+        if cosmos_key:
+            _COSMOS_CLIENT_AIO = CosmosClientAio(cosmos_endpoint, credential=cosmos_key)
+        else:
+            cred = DefaultAzureCredential()
+            _COSMOS_CLIENT_AIO = CosmosClientAio(cosmos_endpoint, credential=cred)
     return _COSMOS_CLIENT_AIO
 
 

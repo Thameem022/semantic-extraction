@@ -6,6 +6,7 @@ import asyncio
 import hashlib
 import logging
 import os
+from pathlib import Path
 import time
 import uuid
 
@@ -57,6 +58,26 @@ async def _compute_sha256_chunked(stream) -> str:
     return hasher.hexdigest()
 
 
+def _doc_id_from_blob_name(blob_name: str) -> str:
+    """
+    Derive docId from an incoming blob filename when possible.
+
+    Expected HTTP-upload path is `incoming/{docId}.pdf`, so the blob filename stem
+    should be a UUID. If not UUID-shaped, fall back to generating a new UUID.
+    """
+    stem = Path(blob_name).stem.strip()
+    if not stem:
+        return str(uuid.uuid4())
+    try:
+        return str(uuid.UUID(stem))
+    except Exception:
+        logger.warning(
+            "DOC_ID_DERIVE_FALLBACK",
+            extra={"blobName": blob_name, "stem": stem, "step": "DOC_ID_DERIVE_FALLBACK"},
+        )
+        return str(uuid.uuid4())
+
+
 async def main(myblob: func.InputStream) -> None:
     """Process blob from incoming container: Cosmos upsert, copy to raw, delete source (async)."""
     doc_id: str | None = None
@@ -74,7 +95,8 @@ async def main(myblob: func.InputStream) -> None:
         else:
             blob_name = name
 
-        doc_id = str(uuid.uuid4())
+        # Reuse the uploaded UUID from incoming filename when available.
+        doc_id = _doc_id_from_blob_name(blob_name)
         policy_type = "unknown"
         original_filename = blob_name
 
