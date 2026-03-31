@@ -1,5 +1,6 @@
 // Storage module: creates a GPv2 storage account with blob versioning,
-// soft delete (retentionDays) and required containers: incoming, raw, duplicates, rejected.
+// soft delete (retentionDays) and required containers: incoming, raw, duplicates,
+// rejected, ocr-raw, ocr-layout, candidates.
 
 @description('Application base name. Used in resource naming.')
 param appName string
@@ -102,6 +103,14 @@ resource containerOcrRaw 'Microsoft.Storage/storageAccounts/blobServices/contain
 resource containerOcrLayout 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
   parent: blobService
   name: 'ocr-layout'
+  properties: {
+    publicAccess: 'None'
+  }
+}
+
+resource containerCandidates 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
+  parent: blobService
+  name: 'candidates'
   properties: {
     publicAccess: 'None'
   }

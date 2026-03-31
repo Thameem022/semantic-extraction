@@ -5,8 +5,13 @@ from shared import cosmos_helpers
 
 
 def test_sync_cosmos_client_singleton():
+    cosmos_helpers._COSMOS_CLIENT = None
     with mock.patch.object(cosmos_helpers, "CosmosClient") as mock_client_cls, mock.patch.object(
         cosmos_helpers, "DefaultAzureCredential"
+    ), mock.patch.dict(
+        "os.environ",
+        {"COSMOS_ENDPOINT": "https://example-cosmos.documents.azure.com:443/"},
+        clear=False,
     ):
         instance1 = cosmos_helpers._get_sync_cosmos_client()
         instance2 = cosmos_helpers._get_sync_cosmos_client()
@@ -16,8 +21,13 @@ def test_sync_cosmos_client_singleton():
 
 
 def test_async_cosmos_client_singleton():
+    cosmos_helpers._COSMOS_CLIENT_AIO = None
     with mock.patch.object(cosmos_helpers, "CosmosClientAio") as mock_client_cls, mock.patch.object(
         cosmos_helpers, "DefaultAzureCredential"
+    ), mock.patch.dict(
+        "os.environ",
+        {"COSMOS_ENDPOINT": "https://example-cosmos.documents.azure.com:443/"},
+        clear=False,
     ):
         instance1 = cosmos_helpers._get_async_cosmos_client()
         instance2 = cosmos_helpers._get_async_cosmos_client()

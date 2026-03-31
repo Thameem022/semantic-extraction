@@ -48,9 +48,9 @@ functionapp.zip
 .test-sample.txt
 
 ########################
-# Local test assets
+# PDFs (local test assets; do not commit)
 ########################
-test*.pdf
+*.pdf
 
 ########################
 # Environment / secrets
