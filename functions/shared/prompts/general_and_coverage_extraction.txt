@@ -1,0 +1,64 @@
+You are an expert insurance application data extractor.
+
+Below is the complete normalized Markdown representation of a Travelers or Chubb insurance application PDF.
+
+Extract ONLY the fields for "GeneralInformation" and "CoverageDetails". Return a valid JSON object with exactly these two top-level keys.
+
+=== DOCUMENT MARKDOWN START ===
+{{MARKDOWN}}
+=== DOCUMENT MARKDOWN END ===
+
+=== REQUIRED OUTPUT SCHEMA ===
+{
+  "GeneralInformation": {
+    "Applicant": string | null,
+    "Address_Street": string | null,
+    "Address_City": string | null,
+    "Address_State": string | null,
+    "Address_ZipCode": string | null,
+    "ApplicantsWebsite": string | null,
+    "NAICSCode": string | null,
+    "DateOfFormation": string | null,
+    "NatureOfOperations": string | null,
+    "Contact_Name": string | null,
+    "Contact_Title": string | null,
+    "Contact_Telephone": string | null,
+    "Contact_Email": string | null,
+    "RiskMgmtContact_Name": string | null,
+    "RiskMgmtContact_Title": string | null,
+    "RiskMgmtContact_Telephone": string | null,
+    "RiskMgmtContact_Email": string | null,
+    "TaxStatus": string | null,
+    "OrganizationalStructure": string | null,
+    "TotalNumberOfLocations": integer | null,
+    "TotalNumberOfEmployees": integer | null,
+    "Employees_US": integer | null,
+    "Employees_California": integer | null,
+    "Employees_Canada": integer | null,
+    "Employees_OutsideUSandCAN": integer | null,
+    "CountriesOfOperationOutsideUS": string | null,
+    "RequestedEffectiveDate": string | null
+  },
+
+  "CoverageDetails": {
+    "CoverageType": string | null,
+    "LimitRequested": string | null,
+    "RetentionRequested": string | null,
+    "SharedLimit": boolean | null,
+    "DutyToDefend": string | null,
+    "CurrentLimit": string | null,
+    "CurrentRetention": string | null,
+    "CurrentPremium": string | null,
+    "CurrentCarrier": string | null
+  }
+}
+
+=== RULES ===
+- Use ONLY information present in the Markdown. Never invent values.
+- Set missing fields to null.
+- For boolean fields, use true or false only.
+- For integer fields, return a plain number (no commas or formatting).
+- NAICSCode should contain only digits (e.g., "8111").
+- Dates should be in MM/DD/YYYY format when available.
+- For CoverageDetails, extract the row corresponding to Employment Practices Liability when multiple coverage lines are listed in a table.
+- Return ONLY the JSON object. No explanations, no markdown.

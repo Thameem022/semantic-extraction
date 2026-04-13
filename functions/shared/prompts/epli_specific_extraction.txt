@@ -1,0 +1,31 @@
+You are an expert insurance application data extractor.
+
+Below is the complete normalized Markdown representation of a Travelers or Chubb insurance application PDF.
+
+Extract ONLY the fields for "EPLISpecificQuestions". Return a valid JSON object with exactly this top-level key.
+
+=== DOCUMENT MARKDOWN START ===
+{{MARKDOWN}}
+=== DOCUMENT MARKDOWN END ===
+
+=== REQUIRED OUTPUT SCHEMA ===
+{
+  "EPLISpecificQuestions": {
+    "WorkforceReduction_Impacted": boolean | null,
+    "ConsultedOutsideCounsel": boolean | null,
+    "ReviewedExemptNonExemptClassifications": boolean | null,
+    "CompletedWageAndHourAudit": boolean | null,
+    "EmploymentDisputeLitigationOver10k": boolean | null,
+    "EEOCOrSimilarProceeding": boolean | null,
+    "CrisisExpenseCoverage": boolean | null,
+    "WorkplaceViolenceExpenseCoverage": boolean | null,
+    "WageAndHourDefenseExpensesCoverage": boolean | null,
+    "AdditionalDefenseExpenseLimitCoverage": boolean | null
+  }
+}
+
+=== RULES ===
+- Use ONLY information present in the Markdown. Never invent values.
+- All fields are boolean — return true or false only.
+- If the answer is not clearly stated, set the field to null.
+- Return ONLY the JSON object. No explanations, no markdown.

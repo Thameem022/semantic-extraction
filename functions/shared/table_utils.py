@@ -135,3 +135,62 @@ def flatten_tables_to_markdown(layout_json: dict, max_pages: int = 5) -> str:
     if not blocks:
         return ""
     return "\n\n".join(str(block.get("markdown") or "") for block in blocks)
+
+
+def serialize_kv_pairs_for_llm(layout_json: dict) -> str:
+    """Render ``keyValuePairs`` as ``Key: Value (Page N)`` lines for LLM context."""
+    pairs = layout_json.get("keyValuePairs")
+    if not isinstance(pairs, list) or not pairs:
+        return ""
+
+    lines: list[str] = []
+    for pair in pairs:
+        if not isinstance(pair, dict):
+            continue
+        key_obj = pair.get("key") or {}
+        value_obj = pair.get("value") or {}
+        key_text = str(key_obj.get("content") or "").strip()
+        raw_value = str(value_obj.get("content") or "").strip()
+        if not key_text:
+            continue
+
+        page_number = 1
+        regions = key_obj.get("boundingRegions")
+        if isinstance(regions, list) and regions:
+            first = regions[0]
+            if isinstance(first, dict):
+                page_number = int(first.get("pageNumber", 1) or 1)
+
+        display_value = raw_value if raw_value else "(empty)"
+        sanitized_value = re.sub(r"[\n\r]+", " ", display_value).strip()
+        lines.append(f"{key_text} {sanitized_value} (Page {page_number})")
+
+    return "\n".join(lines)
+
+
+def serialize_pages_for_llm(layout_json: dict, max_pages: int = 30) -> str:
+    """Render ``pages[].lines`` as plain text blocks per page for LLM context."""
+    pages = layout_json.get("pages")
+    if not isinstance(pages, list) or not pages:
+        return ""
+
+    sections: list[str] = []
+    for page in pages:
+        if not isinstance(page, dict):
+            continue
+        page_number = int(page.get("pageNumber", 1) or 1)
+        if page_number > max_pages:
+            continue
+
+        page_lines: list[str] = []
+        for line in page.get("lines") or []:
+            if not isinstance(line, dict):
+                continue
+            content = str(line.get("content") or "").strip()
+            if content:
+                page_lines.append(content)
+
+        if page_lines:
+            sections.append(f"--- Page {page_number} ---\n" + "\n".join(page_lines))
+
+    return "\n\n".join(sections)

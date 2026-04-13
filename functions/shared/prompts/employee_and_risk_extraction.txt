@@ -1,0 +1,44 @@
+You are an expert insurance application data extractor.
+
+Below is the complete normalized Markdown representation of a Travelers or Chubb insurance application PDF.
+
+Extract ONLY the fields for "EmployeeCategory" and "RiskAssessment". Return a valid JSON object with exactly these two top-level keys.
+
+=== DOCUMENT MARKDOWN START ===
+{{MARKDOWN}}
+=== DOCUMENT MARKDOWN END ===
+
+=== REQUIRED OUTPUT SCHEMA ===
+{
+  "EmployeeCategory": {
+    "FullTimeEmployees_CurrentYearTotal": integer | null,
+    "FullTimeEmployees_CurrentYearCA": integer | null,
+    "FullTimeEmployees_PriorYearTotal": integer | null,
+    "FullTimeEmployees_PriorYearCA": integer | null,
+    "PartTimeEmployees_CurrentYearTotal": integer | null,
+    "PartTimeEmployees_CurrentYearCA": integer | null,
+    "PartTimeEmployees_PriorYearTotal": integer | null,
+    "PartTimeEmployees_PriorYearCA": integer | null,
+    "IndependentContractors_CurrentYearTotal": integer | null,
+    "IndependentContractors_CurrentYearCA": integer | null,
+    "Volunteers_CurrentYearTotal": integer | null,
+    "Volunteers_CurrentYearCA": integer | null,
+    "Top3StatesByEmployeeCount_State1": string | null,
+    "Top3StatesByEmployeeCount_State2": string | null,
+    "Top3StatesByEmployeeCount_State3": string | null,
+    "SalaryRanges_GreaterThan125k": string | null,
+    "SalaryRanges_LessThan125k": string | null
+  },
+
+  "RiskAssessment": {
+    "NoticeOfClaimOrPotentialClaim": boolean | null,
+    "Explanation": string | null
+  }
+}
+
+=== RULES ===
+- Use ONLY information present in the Markdown. Never invent values.
+- Set missing fields to null.
+- For boolean fields, use true or false only.
+- For percentages or counts, copy the exact value shown.
+- Return ONLY the JSON object. No explanations, no markdown.
