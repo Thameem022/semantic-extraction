@@ -1,0 +1,259 @@
+════════════════════════════════════════════════════════════════════════
+  SEMANTIC EXTRACTION — ACCURACY REPORT
+════════════════════════════════════════════════════════════════════════
+
+  Total candidate files (system output) : 20
+  Total documents in Golden Set         : 18
+  Matched (candidate ↔ golden)          : 18
+
+  Candidates with NO golden entry (2) — not scored:
+    • chubb_application_do_epl_etc_2025.pdf
+    • 25-26_EPL_CRIME_-_Chubb_Supp_App.pdf
+
+────────────────────────────────────────────────────────────────────────
+  ACCURACY BY SECTION
+────────────────────────────────────────────────────────────────────────
+
+  General Information                  177/258 (68.6%)  [191 field(s) correctly absent]
+  Coverage Details                     14/28 (50.0%)  [81 field(s) correctly absent]
+  Risk Assessment                      2/16 (12.5%)  [1 field(s) correctly absent]
+  Employee Category                    52/85 (61.2%)  [100 field(s) correctly absent]
+  EPLI Specific Questions              14/59 (23.7%)  [78 field(s) correctly absent]
+
+  ► OVERALL  259/446 (58.1%)
+
+────────────────────────────────────────────────────────────────────────
+  PER-FIELD ACCURACY  (scored = golden had a value)
+────────────────────────────────────────────────────────────────────────
+
+  Applicant                                           18/18 (100.0%)
+  Address - Street                                    18/18 (100.0%)
+  Address - City                                      18/18 (100.0%)
+  Address - State                                     16/18 (88.9%)
+      └─ MISSING in 2 doc(s): Travelers_EPL, EPL_Application_Travelers-_Pacific_Water
+  Address - Zip Code                                  18/18 (100.0%)
+  Applicant's Website                                 9/10 (90.0%)  + 7 correctly absent
+      └─ MISMATCH  "Chubb_App"
+                   got:      'dresher ispartnersllc.com'
+                   expected: 'ispartnersllc.com'
+  NAICS Code                                          8/8 (100.0%)  + 10 correctly absent
+  Date of Formation                                   5/16 (31.2%)  + 2 correctly absent
+      └─ MISSING in 11 doc(s): EPLI_-_Chubb_Application_10-01-25, Travelers_EPLI_App, Chubb_App, FF_Chubb_EPLI_Application_11_21_25_print, Travelers_App_for_EPLI-Crime-_Teds_RV_La, EPLI_-_Travelers_-_Wodden_Nickle_Enterpr, 1__Chubb_D_O__EPLI_App_SiVEC_Biotech_11_, Travelers_Private_Company_Multi-Coverage, Chubb_EPL_Application_25-26, EPLI_App__Travelers__Bill_Cramer_Chevrol, 4i_Chubb_Application_
+  Nature of Operations                                9/18 (50.0%)
+      └─ MISSING in 9 doc(s): _EPL_-_App_Fillable5-142022_response_Aug, Travelers_EPL, Travelers_App_for_EPLI-Crime-_Teds_RV_La, EPLI_-_Travelers_-_Wodden_Nickle_Enterpr, EPL_Application_Travelers-_Pacific_Water, Travelers_Private_Company_Multi-Coverage, Travelers_App_for_EPLI-Crime_-D___O_and_, Travelers_App, 24-25_Travelers_Mgmt_Renewal_App_pdf
+  Contact - Name                                      10/12 (83.3%)  + 6 correctly absent
+      └─ MISSING in 2 doc(s): Travelers_EPL, EPL_Application_Travelers-_Pacific_Water
+  Contact - Title                                     3/10 (30.0%)  + 8 correctly absent
+      └─ MISSING in 7 doc(s): _EPL_-_App_Fillable5-142022_response_Aug, Travelers_EPL, EPLI_-_Travelers_-_Wodden_Nickle_Enterpr, 1__Chubb_D_O__EPLI_App_SiVEC_Biotech_11_, EPL_Application_Travelers-_Pacific_Water, Travelers_Private_Company_Multi-Coverage, Chubb_EPL_Application_25-26
+  Contact - Telephone                                 5/5 (100.0%)  + 13 correctly absent
+  Contact - Email                                     11/11 (100.0%)  + 7 correctly absent
+  Risk Mgmt Contact - Name                            1/1 (100.0%)  + 16 correctly absent
+  Risk Mgmt Contact - Title                           1/1 (100.0%)  + 16 correctly absent
+  Risk Mgmt Contact - Telephone                       1/1 (100.0%)  + 17 correctly absent
+  Risk Mgmt Contact - Email                           0/1 (0.0%)  + 17 correctly absent
+      └─ MISMATCH  "Chubb_App"
+                   got:      'rtnersllc.com'
+                   expected: 'samantha@ispartnersllc.com'
+  Tax Status                                          [field absent on all forms (18 docs)]
+  Organizational Structure                            0/17 (0.0%)  + 1 correctly absent
+      └─ MISSING in 17 doc(s): EPLI_-_Chubb_Application_10-01-25, Travelers_EPLI_App, Chubb_App, FF_Chubb_EPLI_Application_11_21_25_print, _EPL_-_App_Fillable5-142022_response_Aug, Travelers_EPL, Travelers_App_for_EPLI-Crime-_Teds_RV_La, EPLI_-_Travelers_-_Wodden_Nickle_Enterpr, 1__Chubb_D_O__EPLI_App_SiVEC_Biotech_11_, EPL_Application_Travelers-_Pacific_Water, Travelers_Private_Company_Multi-Coverage, Travelers_App_for_EPLI-Crime_-D___O_and_, Travelers_App, Chubb_EPL_Application_25-26, EPLI_App__Travelers__Bill_Cramer_Chevrol, 25-26_EPLI_Application_-_Travelers3_, 4i_Chubb_Application_
+  Total Number of Locations                           5/6 (83.3%)  + 8 correctly absent
+      └─ MISSING in 1 doc(s): Chubb_App
+  Total Number of Employees                           4/14 (28.6%)
+      └─ MISMATCH  "Chubb_App"
+                   got:      '46'
+                   expected: '52 (46 ft + 6 pt)'
+      └─ MISMATCH  "EPLI_-_Travelers_-_Wodden_Nickle_Enterpr"
+                   got:      '20'
+                   expected: '20 (3 ft + 17 pt)'
+      └─ MISMATCH  "1__Chubb_D_O__EPLI_App_SiVEC_Biotech_11_"
+                   got:      '7'
+                   expected: '7 ft'
+      └─ MISMATCH  "Travelers_Private_Company_Multi-Coverage"
+                   got:      '502'
+                   expected: '502 (500 ft + 2 pt)'
+      └─ MISMATCH  "25-26_EPLI_Application_-_Travelers3_"
+                   got:      '399'
+                   expected: '418 (399 ft + 19 pt)'
+      └─ MISMATCH  "4i_Chubb_Application_"
+                   got:      '2'
+                   expected: '7 ft'
+      └─ MISSING in 4 doc(s): EPLI_-_Chubb_Application_10-01-25, FF_Chubb_EPLI_Application_11_21_25_print, _EPL_-_App_Fillable5-142022_response_Aug, Chubb_EPL_Application_25-26
+  Employees - U.S.                                    1/4 (25.0%)  + 4 correctly absent
+      └─ MISMATCH  "Chubb_App"
+                   got:      '46'
+                   expected: '52'
+      └─ MISMATCH  "Chubb_EPL_Application_25-26"
+                   got:      '60'
+                   expected: '293'
+      └─ MISSING in 1 doc(s): 4i_Chubb_Application_
+  Employees - California                              7/14 (50.0%)  + 4 correctly absent
+      └─ MISSING in 7 doc(s): EPLI_-_Chubb_Application_10-01-25, FF_Chubb_EPLI_Application_11_21_25_print, _EPL_-_App_Fillable5-142022_response_Aug, Travelers_EPL, Travelers_App, 4i_Chubb_Application_, 24-25_Travelers_Mgmt_Renewal_App_pdf
+  Employees - Canada                                  [field absent on all forms (14 docs)]
+  Employees - Outside U.S. & CAN                      4/12 (33.3%)  + 2 correctly absent
+      └─ MISMATCH  "25-26_EPLI_Application_-_Travelers3_"
+                   got:      '19'
+                   expected: 'no'
+      └─ MISSING in 7 doc(s): EPLI_-_Chubb_Application_10-01-25, FF_Chubb_EPLI_Application_11_21_25_print, _EPL_-_App_Fillable5-142022_response_Aug, Travelers_EPL, EPLI_-_Travelers_-_Wodden_Nickle_Enterpr, EPL_Application_Travelers-_Pacific_Water, 4i_Chubb_Application_
+  Countries of Operation Outside U.S.                 0/1 (0.0%)  + 16 correctly absent
+      └─ MISMATCH  "Chubb_App"
+                   got:      'usa'
+                   expected: 'uk – 3 employees'
+  Requested Effective Date                            5/6 (83.3%)  + 5 correctly absent
+      └─ MISSING in 1 doc(s): _EPL_-_App_Fillable5-142022_response_Aug
+  EPL - Limit Requested                               5/6 (83.3%)  + 6 correctly absent
+      └─ MISSING in 1 doc(s): Chubb_EPL_Application_25-26
+  EPL - Retention Requested                           3/3 (100.0%)  + 10 correctly absent
+  EPL - Shared Limit                                  [field absent on all forms (9 docs)]
+  EPL - Duty to Defend                                0/8 (0.0%)  + 9 correctly absent
+      └─ MISMATCH  "Travelers_App_for_EPLI-Crime-_Teds_RV_La"
+                   got:      'selected'
+                   expected: 'non-duty (no duty to defend)'
+      └─ MISMATCH  "Travelers_App_for_EPLI-Crime_-D___O_and_"
+                   got:      'yes'
+                   expected: 'non-duty (no duty to defend)'
+      └─ MISMATCH  "EPLI_App__Travelers__Bill_Cramer_Chevrol"
+                   got:      'requested'
+                   expected: 'non-duty (no duty to defend)'
+      └─ MISSING in 5 doc(s): Travelers_EPL, EPL_Application_Travelers-_Pacific_Water, Travelers_Private_Company_Multi-Coverage, Travelers_App, 24-25_Travelers_Mgmt_Renewal_App_pdf
+  EPL - Current Limit                                 2/4 (50.0%)  + 9 correctly absent
+      └─ MISMATCH  "FF_Chubb_EPLI_Application_11_21_25_print"
+                   got:      '2m'
+                   expected: '$2,000,000'
+      └─ MISSING in 1 doc(s): 4i_Chubb_Application_
+  EPL - Current Retention                             1/3 (33.3%)  + 12 correctly absent
+      └─ MISMATCH  "FF_Chubb_EPLI_Application_11_21_25_print"
+                   got:      '2m'
+                   expected: '$2,000,000'
+      └─ MISSING in 1 doc(s): 4i_Chubb_Application_
+  EPL - Current Premium                               [field absent on all forms (15 docs)]
+  EPL - Current Carrier                               3/4 (75.0%)  + 11 correctly absent
+      └─ MISMATCH  "Chubb_EPL_Application_25-26"
+                   got:      'nix'
+                   expected: 'n/k'
+  Notice of Claim (Past 18 Mo)                        2/16 (12.5%)  + 1 correctly absent
+      └─ MISMATCH  "Chubb_EPL_Application_25-26"
+                   got:      'no'
+                   expected: 'yes'
+      └─ MISMATCH  "4i_Chubb_Application_"
+                   got:      'yes'
+                   expected: 'no'
+      └─ MISSING in 12 doc(s): EPLI_-_Chubb_Application_10-01-25, Chubb_App, _EPL_-_App_Fillable5-142022_response_Aug, Travelers_EPL, Travelers_App_for_EPLI-Crime-_Teds_RV_La, EPLI_-_Travelers_-_Wodden_Nickle_Enterpr, 1__Chubb_D_O__EPLI_App_SiVEC_Biotech_11_, EPL_Application_Travelers-_Pacific_Water, Travelers_Private_Company_Multi-Coverage, Travelers_App, 25-26_EPLI_Application_-_Travelers3_, 24-25_Travelers_Mgmt_Renewal_App_pdf
+  FT Employees - Current Year Total                   12/14 (85.7%)
+      └─ MISMATCH  "FF_Chubb_EPLI_Application_11_21_25_print"
+                   got:      '33'
+                   expected: '34'
+      └─ MISMATCH  "4i_Chubb_Application_"
+                   got:      '2'
+                   expected: '7'
+  FT Employees - Current Year CA                      7/13 (53.8%)  + 2 correctly absent
+      └─ MISSING in 6 doc(s): EPLI_-_Chubb_Application_10-01-25, FF_Chubb_EPLI_Application_11_21_25_print, _EPL_-_App_Fillable5-142022_response_Aug, EPLI_-_Travelers_-_Wodden_Nickle_Enterpr, 1__Chubb_D_O__EPLI_App_SiVEC_Biotech_11_, Chubb_EPL_Application_25-26
+  FT Employees - Prior Year Total                     4/5 (80.0%)  + 10 correctly absent
+      └─ MISSING in 1 doc(s): Travelers_App
+  FT Employees - Prior Year CA                        3/3 (100.0%)  + 12 correctly absent
+  PT Employees - Current Year Total                   11/13 (84.6%)  + 1 correctly absent
+      └─ MISMATCH  "FF_Chubb_EPLI_Application_11_21_25_print"
+                   got:      '2'
+                   expected: 'no'
+      └─ MISMATCH  "4i_Chubb_Application_"
+                   got:      '3'
+                   expected: 'no'
+  PT Employees - Prior Year Total                     4/5 (80.0%)  + 10 correctly absent
+      └─ MISSING in 1 doc(s): Travelers_App
+  Independent Contractors                             10/14 (71.4%)  + 2 correctly absent
+      └─ MISMATCH  "FF_Chubb_EPLI_Application_11_21_25_print"
+                   got:      '10995'
+                   expected: '2'
+      └─ MISMATCH  "Travelers_App"
+                   got:      'yes'
+                   expected: 'no'
+      └─ MISMATCH  "4i_Chubb_Application_"
+                   got:      '6'
+                   expected: '9'
+      └─ MISSING in 1 doc(s): EPLI_-_Travelers_-_Wodden_Nickle_Enterpr
+  Volunteers                                          1/1 (100.0%)  + 15 correctly absent
+  Top State 1                                         0/6 (0.0%)  + 2 correctly absent
+      └─ MISMATCH  "FF_Chubb_EPLI_Application_11_21_25_print"
+                   got:      'al, co, de,(fl) ga, ks, la, me, mo, mt, sc, tn, ut, wy'
+                   expected: 'tx'
+      └─ MISMATCH  "Travelers_EPL"
+                   got:      'california'
+                   expected: 'ca – 36'
+      └─ MISMATCH  "EPL_Application_Travelers-_Pacific_Water"
+                   got:      'california'
+                   expected: 'ca – 36'
+      └─ MISMATCH  "Travelers_App"
+                   got:      'va'
+                   expected: 'va – 3'
+      └─ MISMATCH  "24-25_Travelers_Mgmt_Renewal_App_pdf"
+                   got:      'ca'
+                   expected: 'ca – 55'
+      └─ MISSING in 1 doc(s): EPLI_-_Travelers_-_Wodden_Nickle_Enterpr
+  Top State 2                                         0/2 (0.0%)  + 12 correctly absent
+      └─ MISMATCH  "Travelers_App"
+                   got:      'ca'
+                   expected: 'ca – 2'
+      └─ MISMATCH  "24-25_Travelers_Mgmt_Renewal_App_pdf"
+                   got:      'az'
+                   expected: 'az – 3'
+  Top State 3                                         0/2 (0.0%)  + 12 correctly absent
+      └─ MISMATCH  "Travelers_App"
+                   got:      'ma'
+                   expected: 'ma – 2'
+      └─ MISMATCH  "24-25_Travelers_Mgmt_Renewal_App_pdf"
+                   got:      'fl'
+                   expected: 'fl – 3'
+  Salary >= $125K (%)                                 0/3 (0.0%)  + 11 correctly absent
+      └─ MISMATCH  "Chubb_App"
+                   got:      '32'
+                   expected: '32% (>$120k)'
+      └─ MISMATCH  "FF_Chubb_EPLI_Application_11_21_25_print"
+                   got:      '39.0 %'
+                   expected: '39'
+      └─ MISMATCH  "4i_Chubb_Application_"
+                   got:      '3'
+                   expected: '3% (>$150k)'
+  Salary < $125K (%)                                  0/4 (0.0%)  + 11 correctly absent
+      └─ MISMATCH  "Chubb_App"
+                   got:      '84'
+                   expected: '52% ($61k-$120k); 16% (up to $60k)'
+      └─ MISMATCH  "FF_Chubb_EPLI_Application_11_21_25_print"
+                   got:      '56.0 %'
+                   expected: '61'
+      └─ MISMATCH  "Chubb_EPL_Application_25-26"
+                   got:      '10'
+                   expected: '90% (up to $50k); 10% ($50k-$150k)'
+      └─ MISMATCH  "4i_Chubb_Application_"
+                   got:      '4'
+                   expected: '4% ($50k-$150k)'
+  Q1: >50 emp or 5%+ impacted (terminations)?         3/8 (37.5%)  + 6 correctly absent
+      └─ MISMATCH  "Travelers_Private_Company_Multi-Coverage"
+                   got:      'yes'
+                   expected: 'no'
+      └─ MISSING in 4 doc(s): Chubb_App, 1__Chubb_D_O__EPLI_App_SiVEC_Biotech_11_, Travelers_App, 25-26_EPLI_Application_-_Travelers3_
+  Q2: Outside counsel re: workforce reduction?        2/8 (25.0%)  + 7 correctly absent
+      └─ MISSING in 6 doc(s): Chubb_App, _EPL_-_App_Fillable5-142022_response_Aug, 1__Chubb_D_O__EPLI_App_SiVEC_Biotech_11_, Travelers_App, 25-26_EPLI_Application_-_Travelers3_, 4i_Chubb_Application_
+  Q3: Exempt/nonexempt review (12 mo)?                1/7 (14.3%)  + 7 correctly absent
+      └─ MISSING in 6 doc(s): Chubb_App, 1__Chubb_D_O__EPLI_App_SiVEC_Biotech_11_, Travelers_App, Chubb_EPL_Application_25-26, 25-26_EPLI_Application_-_Travelers3_, 4i_Chubb_Application_
+  Q4: Wage & hour audit (12 mo)?                      1/7 (14.3%)  + 7 correctly absent
+      └─ MISSING in 6 doc(s): Chubb_App, 1__Chubb_D_O__EPLI_App_SiVEC_Biotech_11_, Travelers_App, Chubb_EPL_Application_25-26, 25-26_EPLI_Application_-_Travelers3_, 4i_Chubb_Application_
+  Q5: Employment dispute >$10K (12 mo)?               4/15 (26.7%)  + 3 correctly absent
+      └─ MISSING in 11 doc(s): EPLI_-_Chubb_Application_10-01-25, Chubb_App, _EPL_-_App_Fillable5-142022_response_Aug, Travelers_EPL, EPLI_-_Travelers_-_Wodden_Nickle_Enterpr, 1__Chubb_D_O__EPLI_App_SiVEC_Biotech_11_, EPL_Application_Travelers-_Pacific_Water, Travelers_Private_Company_Multi-Coverage, Travelers_App, 25-26_EPLI_Application_-_Travelers3_, 4i_Chubb_Application_
+  Q6: EEOC or similar (3 yrs)?                        3/14 (21.4%)  + 3 correctly absent
+      └─ MISMATCH  "Chubb_App"
+                   got:      'yes'
+                   expected: 'no'
+      └─ MISMATCH  "Chubb_EPL_Application_25-26"
+                   got:      'yes'
+                   expected: 'no'
+      └─ MISSING in 9 doc(s): EPLI_-_Chubb_Application_10-01-25, _EPL_-_App_Fillable5-142022_response_Aug, Travelers_EPL, EPLI_-_Travelers_-_Wodden_Nickle_Enterpr, 1__Chubb_D_O__EPLI_App_SiVEC_Biotech_11_, EPL_Application_Travelers-_Pacific_Water, Travelers_Private_Company_Multi-Coverage, Travelers_App, 25-26_EPLI_Application_-_Travelers3_
+  Q7: Crisis Expense coverage?                        [field absent on all forms (10 docs)]
+  Q8: Workplace Violence Expense coverage?            [field absent on all forms (8 docs)]
+  Q9: Wage & Hour Defense Expenses coverage?          [field absent on all forms (13 docs)]
+  Q10: Additional Defense Expense Limit?              [field absent on all forms (14 docs)]
+
+════════════════════════════════════════════════════════════════════════
+  OVERALL ACCURACY : 259/446 fields correct  (58.1%)
+════════════════════════════════════════════════════════════════════════
+
+  Detailed row-level comparison → /Users/thameem/Desktop/Spring-2026/BMP2/semantic-extraction/reports/field_comparison.csv
