@@ -64,9 +64,9 @@ _candidates = load_candidates()
 SCORED = {"CORRECT", "MISMATCH", "MISSING"}
 
 total_candidates = 20
-total_golden     = 18
-matched          = 18
-no_golden_docs   = ["chubb_application_do_epl_etc_2025.pdf", "25-26_EPL_CRIME_-_Chubb_Supp_App.pdf"]
+total_golden     = 20
+matched          = 20
+no_golden_docs   = []
 
 scored_df  = df[df["Result"].isin(SCORED)]
 overall_c  = (scored_df["Result"] == "CORRECT").sum()
@@ -387,10 +387,3 @@ else:
         },
     )
 
-st.divider()
-
-# ── Row 5: Unscored candidates notice ────────────────────────────────────────
-with st.expander("Candidates with no Golden Set entry (not scored)"):
-    for n in no_golden_docs:
-        st.write(f"• `{n}`")
-    st.caption("These files were produced by the system but have no corresponding row in the Golden Set.")
