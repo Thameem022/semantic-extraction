@@ -23,15 +23,37 @@ if [[ $# -eq 0 ]]; then
 fi
 
 count=0
+batch_count=0
+BATCH_SIZE="${BATCH_SIZE:-3}"
+BATCH_WAIT_SECONDS="${BATCH_WAIT_SECONDS:-180}"
+total_valid=0
+
+for f in "$@"; do
+  if [[ -f "$f" ]]; then
+    total_valid=$((total_valid + 1))
+  fi
+done
+
 for f in "$@"; do
   if [[ ! -f "$f" ]]; then
     echo "Skipping (not a file): $f"
     continue
   fi
   count=$((count + 1))
+  batch_count=$((batch_count + 1))
   echo "=== [$count] Processing: $f ==="
   "${E2E_SCRIPT}" "$f"
   echo ""
+
+  if (( batch_count == BATCH_SIZE )); then
+    if (( count < total_valid )); then
+      echo "=== Batch of ${BATCH_SIZE} complete. Waiting ${BATCH_WAIT_SECONDS} seconds before next batch... ==="
+      sleep "${BATCH_WAIT_SECONDS}"
+      echo "=== Resuming batch upload ==="
+      echo ""
+    fi
+    batch_count=0
+  fi
 done
 
 echo "=== Batch complete: $count file(s) uploaded to incoming ==="
