@@ -7,6 +7,7 @@ Thumbs.db
 *.swo
 .vscode/
 .idea/
+.claude/
 
 ########################
 # Python
@@ -20,6 +21,9 @@ __pycache__/
 .ruff_cache/
 .coverage
 htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
 
 ########################
 # Virtual environments
@@ -69,3 +73,14 @@ node_modules/
 npm-debug.log*
 yarn-error.log*
 
+########################
+# Generated reports / artifacts
+########################
+reports/field_comparison.csv
+reports/*.pptx
+
+# OCR report output (generated)
+chandra-ocr-report/
+
+# Local scratch notebooks (the tracked test suite lives in tests/)
+test/
